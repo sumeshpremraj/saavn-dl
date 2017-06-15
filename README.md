@@ -29,7 +29,7 @@ $ saavn-dl -p <playlist URL>
 ### Contributing
 
 If you want a new feature or want to report a bug, open an issue.
-If you want to add a feature, fork the repoo, create a feature branch, commit your changes and then send a pull request.
+If you want to add a feature, fork the repo, create a feature branch, commit your changes and then send a pull request.
 
 ### To do
 
