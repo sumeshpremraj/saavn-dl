@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import sqlite3
+import subprocess
+import os
+import argparse
+import logging
+import sys
+
+try:
+    import requests
+    from bs4 import BeautifulSoup
+except Exception as e:
+    print("Modules missing, please run `pip install -r requirements.txt`")
+    sys.exit(1)
+
+# brew install libav
+
+# Set up logging
+logging.basicConfig(
+    format="%(levelname)s: %(asctime)s %(message)s",
+    filename="/tmp/saavn_dl.log",
+    level=logging.WARN
+    )
+
+parser = argparse.ArgumentParser(description='Download songs from Gaana playlists. This uses youtube-dl to download the songs from YouTube')
+parser.add_argument('-p', '--playlist', help='Playlist URL')
+#parser.add_argument('-l', '--limit', type=int, default=-1, help='Number of songs to download (default: all)')
+
+args = parser.parse_args()
+
+playlist_name = args.playlist.split('/')[6]
+
+# Display help text if no argument is provided
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
+
+# sqlite setup
+try:
+    con = sqlite3.connect('db/songs.db')
+except sqlite3.Error as e:
+    print("SQLite Error: ", e.args[0])
+
+# Switch to download directory
+os.chdir('./downloads/')
+
+con.execute('''CREATE TABLE IF NOT EXISTS saavn_''' + playlist_name + '''(
+		id integer primary key not null,
+		stored_date date not null default CURRENT_TIMESTAMP,
+		title text not null unique
+	)''')
+
+# Use Chrome mobile UA
+headers = requests.utils.default_headers()
+headers.update({'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X)\
+ AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1'})
+
+# eg playlist: http://www.saavn.com/s/featured/english/US_UK_Top_40/
+r = requests.get(args.playlist, headers=headers)
+data = r.text.encode('utf-8')
+content = BeautifulSoup(data, 'html.parser')
+
+for res in content.find_all('p', class_='song-name'):
+    title = str(res)[27:].split('<p>')[0]
+    print("Title: " + title)
+
+    mp3_filename = subprocess.Popen(
+        'youtube-dl --get-filename -x --audio-format mp3 "ytsearch:{}"'.format(title),
+        shell=True, stdout=subprocess.PIPE
+        ).stdout.read().decode('utf-8').strip().replace('webm', 'mp3')
+
+    logging.info("File name: " + mp3_filename)
+
+    sql_query = 'insert into playlist_name ({}) values("{}")'.format('title', mp3_filename)
+    logging.info('SQL: ' + sql_query)
+    try:
+        con.execute(sql_query)
+    except sqlite3.IntegrityError:
+        pass
+
+    comm = 'youtube-dl -x --audio-format mp3 "ytsearch:{}"'.format(title)
+    logging.info(comm)
+    try:
+        p = subprocess.Popen(
+            comm,
+            shell=True,
+            stdout=subprocess.PIPE
+            )
+        p.check_call()
+    except subprocess.CalledProcessError as e:
+        logging.info(str(e))
+
+con.commit()
+con.close()

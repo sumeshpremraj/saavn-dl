@@ -1,0 +1,9 @@
+files
+db
+build
+dist
+MANIFEST
+*egg*
+
+.DS_Store
+venv/
