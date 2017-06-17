@@ -6,6 +6,13 @@ import os
 import argparse
 import logging
 import sys
+import tempfile
+
+# Hardcoded value for OS X because gettempdir() returns a /var/folders/ directory
+if sys.platform == 'darwin':
+    LOG_FILE = '/tmp/saavn-dl.log'
+else:
+    LOG_FILE = os.path.join(tempfile.gettempdir(), 'saavn-dl.log')
 
 try:
     import requests
@@ -25,7 +32,7 @@ logging.basicConfig(
 
 parser = argparse.ArgumentParser(description='Download songs from Saavn playlists. This uses youtube-dl to download the songs from YouTube')
 parser.add_argument('-p', '--playlist', help='Playlist URL')
-parser.add_argument('-v', '--verbose', help='Verbose logs on screen and to log file /tmp/saavn_dl.log', action='store_true')
+parser.add_argument('-v', '--verbose', help='Verbose logs on screen and to log file '+ LOG_FILE, action='store_true')
 #parser.add_argument('-l', '--limit', type=int, default=-1, help='Number of songs to download (default: all)')
 
 args = parser.parse_args()
@@ -49,14 +56,14 @@ try:
 except sqlite3.Error as e:
     print("SQLite Error: ", e.args[0])
 
-# Switch to download directory
-os.chdir('./downloads/')
-
-con.execute('''CREATE TABLE IF NOT EXISTS saavn_''' + playlist_name + '''(
+con.execute('CREATE TABLE IF NOT EXISTS saavn_' + playlist_name + '''(
 		id integer primary key not null,
 		stored_date date not null default CURRENT_TIMESTAMP,
 		title text not null unique
 	)''')
+
+# Switch to download directory
+os.chdir('./downloads/')
 
 # Use Chrome mobile UA
 headers = requests.utils.default_headers()
