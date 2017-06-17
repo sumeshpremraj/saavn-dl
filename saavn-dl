@@ -20,11 +20,12 @@ except Exception as e:
 logging.basicConfig(
     format="%(levelname)s: %(asctime)s %(message)s",
     filename="/tmp/saavn_dl.log",
-    level=logging.WARN
+    level=logging.INFO
     )
 
-parser = argparse.ArgumentParser(description='Download songs from Gaana playlists. This uses youtube-dl to download the songs from YouTube')
+parser = argparse.ArgumentParser(description='Download songs from Saavn playlists. This uses youtube-dl to download the songs from YouTube')
 parser.add_argument('-p', '--playlist', help='Playlist URL')
+parser.add_argument('-v', '--verbose', help='Verbose logs on screen and to log file /tmp/saavn_dl.log', action='store_true')
 #parser.add_argument('-l', '--limit', type=int, default=-1, help='Number of songs to download (default: all)')
 
 args = parser.parse_args()
@@ -35,6 +36,12 @@ playlist_name = args.playlist.split('/')[6]
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
+
+def logger(msg):
+    print msg
+    if args.verbose:
+        logging.info(msg)
+
 
 # sqlite setup
 try:
@@ -70,17 +77,17 @@ for res in content.find_all('p', class_='song-name'):
         shell=True, stdout=subprocess.PIPE
         ).stdout.read().decode('utf-8').strip().replace('webm', 'mp3')
 
-    logging.info("File name: " + mp3_filename)
+    logger("File name: " + mp3_filename)
 
     sql_query = 'insert into playlist_name ({}) values("{}")'.format('title', mp3_filename)
-    logging.info('SQL: ' + sql_query)
+    logger('SQL: ' + sql_query)
     try:
         con.execute(sql_query)
     except sqlite3.IntegrityError:
         pass
 
     comm = 'youtube-dl -x --audio-format mp3 "ytsearch:{}"'.format(title)
-    logging.info(comm)
+    print(comm)
     try:
         p = subprocess.Popen(
             comm,
@@ -89,7 +96,7 @@ for res in content.find_all('p', class_='song-name'):
             )
         p.check_call()
     except subprocess.CalledProcessError as e:
-        logging.info(str(e))
+        print(str(e))
 
 con.commit()
 con.close()
