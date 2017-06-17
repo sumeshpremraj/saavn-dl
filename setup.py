@@ -7,5 +7,9 @@ setup(name='saavn-dl',
       author='Sumesh P',
       author_email='me@sumeshp.com',
       license='MIT',
-      scripts=['saavn-dl']
+      scripts=['saavn-dl'],
+      install_requires=[
+            'beautifulsoup4', 
+            'requests',
+            ]
 )
