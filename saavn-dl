@@ -45,22 +45,28 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 def logger(msg):
-    print msg
+    print(msg)
     if args.verbose:
         logging.info(msg)
 
+# Create required dirs
+for dir in ["db", "downloads"]:
+    try:
+        os.mkdir(dir)
+    except FileExistsError:
+        pass
 
 # sqlite setup
 try:
     con = sqlite3.connect('db/songs.db')
-except sqlite3.Error as e:
-    print("SQLite Error: ", e.args[0])
-
-con.execute('CREATE TABLE IF NOT EXISTS saavn_' + playlist_name + '''(
+    con.execute('CREATE TABLE IF NOT EXISTS saavn_' + playlist_name + '''(
 		id integer primary key not null,
 		stored_date date not null default CURRENT_TIMESTAMP,
 		title text not null unique
 	)''')
+except sqlite3.Error as e:
+    print("SQLite Error:", str(e))
+    sys.exit(1)
 
 # Switch to download directory
 os.chdir('./downloads/')
@@ -70,7 +76,7 @@ headers = requests.utils.default_headers()
 headers.update({'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X)\
  AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1'})
 
-# eg playlist: http://www.saavn.com/s/featured/english/US_UK_Top_40/
+# eg playlist: https://www.jiosaavn.com/featured/us-uk-top-40/aorYsyBFfFQ_
 r = requests.get(args.playlist, headers=headers)
 data = r.text.encode('utf-8')
 content = BeautifulSoup(data, 'html.parser')
