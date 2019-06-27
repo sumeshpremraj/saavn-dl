@@ -2,36 +2,28 @@
 I'm too lazy to download songs and too cheap to buy subscriptions, so I wrote this tiny script to fetch Saavn playlists
  and download the audio from YouTube.
 
-The script stores the download history in an SQLite DB, so that it does not
-download the same files repeatedly.
+The script stores the download history in an SQLite DB, so that it does not download the same files repeatedly.
 
-This is a very hacky, ugly version that _just works_, (for now).
+This is a very hacky, ugly version that _just works_.
 
 ### Why Saavn?
 Spotify/Apple Music are more famous, but I wanted something that has Bollywood and other Indian language songs too. Also, I wanted FREE (see the first line in the readme).
 
 Gaana/Saavn are the obvious candidates, and I wrote this so long ago that I actually forgot why I didn't use Gaana :')
 
+### Prerequisites
+- Python 3.7
+- Git
+
 ## Installation
-### pip module
-This will be uploaded as a pip module for Python 2.7+ once I finish the to-do section below =)
-
-```
-# Python 3, preferrably
-$ pip3 install saavn-dl
-
-OR
-
-# Python 2, if you really need it
-$ pip install saavn-dl
-```
-
-### From source
-You can also clone this repo and run the script directly.
+Clone the repo and install the dependencies to get started.
 
 ```
 $ git clone https://github.com/sumeshpremraj/saavn-dl.git
-$ cd saavn-dl 
+$ cd saavn-dl
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+$ pip install -r requirements.txt
 $ python3 saavn-dl --help
 ```
 
@@ -45,7 +37,6 @@ $ saavn-dl -p <playlist URL>
 - [ ] Import youtube-dl as a module, shelling out is baaaaad
 - [ ] Check for ffmpeg/libav (depending on OS) for audio conversion
 - [ ] Option to clear DB to start afresh
-- [ ] Option for verbose logging
 - [ ] Refactor and use console_scripts in setuptools for Windows compatibility
 - [ ] Tests
 - [ ] Remove SQLite and try json on disk?
