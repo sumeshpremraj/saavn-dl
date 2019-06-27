@@ -4,6 +4,9 @@ build
 dist
 MANIFEST
 *egg*
+downloads
+venv/
 
 .DS_Store
-venv/
+.venv
+.vscode

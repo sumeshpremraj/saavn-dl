@@ -37,7 +37,8 @@ parser.add_argument('-v', '--verbose', help='Verbose logs on screen and to log f
 
 args = parser.parse_args()
 
-playlist_name = args.playlist.split('/')[6]
+playlist_name = args.playlist.split('/')[4]
+playlist_name = playlist_name.replace('-', '_')
 
 # Display help text if no argument is provided
 if len(sys.argv) == 1:
@@ -92,7 +93,7 @@ for res in content.find_all('p', class_='song-name'):
 
     logger("File name: " + mp3_filename)
 
-    sql_query = 'insert into playlist_name ({}) values("{}")'.format('title', mp3_filename)
+    sql_query = 'insert into {} ({}) values("{}")'.format('saavn_'+ playlist_name, 'title', mp3_filename)
     logger('SQL: ' + sql_query)
     try:
         con.execute(sql_query)
@@ -102,12 +103,7 @@ for res in content.find_all('p', class_='song-name'):
     comm = 'youtube-dl -x --audio-format mp3 "ytsearch:{}"'.format(title)
     print(comm)
     try:
-        p = subprocess.Popen(
-            comm,
-            shell=True,
-            stdout=subprocess.PIPE
-            )
-        p.check_call()
+        subprocess.check_call(comm, shell=True)
     except subprocess.CalledProcessError as e:
         print(str(e))
 
