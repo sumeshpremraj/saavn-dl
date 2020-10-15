@@ -16,9 +16,14 @@ Gaana/Saavn are the obvious candidates, and I wrote this so long ago that I actu
 - Git
 
 ## Installation
-Clone the repo and install the dependencies to get started.
+There are two options to install:
 
-```
+#### Install using pip
+    pip install saavn-dl
+
+#### Install from source
+Clone the repo and install the dependencies to get started.
+```bash
 $ git clone https://github.com/sumeshpremraj/saavn-dl.git
 $ cd saavn-dl
 $ python3 -m venv .venv
@@ -28,7 +33,7 @@ $ python3 saavn-dl --help
 ```
 
 ### Usage
-```
+```bash
 $ saavn-dl -p <playlist URL>
 ```
 

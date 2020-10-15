@@ -82,8 +82,8 @@ r = requests.get(args.playlist, headers=headers)
 data = r.text.encode('utf-8')
 content = BeautifulSoup(data, 'html.parser')
 
-for res in content.find_all('p', class_='song-name'):
-    title = str(res)[27:].split('<p>')[0]
+for res in content.find_all('a', class_='u-color-js-gray'):
+    title = str(res).split('>')[1].split('<')[0]
     print("Title: " + title)
 
     mp3_filename = subprocess.Popen(
